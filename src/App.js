@@ -1,15 +1,19 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import './App.css';
 import AppBar from 'material-ui/AppBar';
-import AutoComplete from 'material-ui/AutoComplete';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import IconLocationOn from 'material-ui/svg-icons/communication/location-on';
 import axios from 'axios';
-// import MobileTearSheet from '../../../MobileTearSheet';
 import {List, ListItem} from 'material-ui/List';
 import SearchBar from 'material-ui-search-bar'
+import Subheader from 'material-ui/Subheader';
+import {
+  activateGeod,
+  closeGeod,
+} from './redux';
 // set environment variables
-export const GOOGLE_PLACES_API_KEY = "AIzaSyA7vMAOQL4WkTd_BRNZmJi7nkAumHj0wH8"
+export const GOOGLE_PLACES_API_KEY = "AIzaSyCp3fWNRJXJxq0gJnj_t_vvGsffF11nsJ0"
 export const GOOGLE_PLACES_OUTPUT_FORMAT = "json"
 
 
@@ -38,8 +42,9 @@ class App extends Component {
     this.updateDataSource = this.updateDataSource.bind(this);
   }
 
-  handleUpdateInput = (value) => {
-   this.fetchPlaces(value);
+  handleUpdateInput(value){
+    //debugger;
+    this.fetchPlaces(value);
   };
 
   updateDataSource(placesDetails){
@@ -71,49 +76,43 @@ class App extends Component {
         });
    }
 
-  componentWillMount(){
-   this.fetchPlaces('pind');
+
+  createPlacesList(placesDetails){
+    this.placesList =  placesDetails.map((placesDetail,index)=>(<ListItem key={`key-${index}`} primaryText={placesDetail} leftIcon={<IconLocationOn />} />));
+    return (
+      <List>
+        <Subheader key={`key-header`}>places</Subheader>
+        {this.placesList}
+      </List>);
   }
 
   render() {
     console.log(this.state.dataSource);
+    let placesList = <Subheader >No data</Subheader>
+    if(this.state.dataSource.length){
+      placesList = this.createPlacesList(this.state.dataSource);
+    }
     return (
       <MuiThemeProvider>
         <div className="App">
           <AppBar
-            title={<span style={styles.title}>Title</span>}
+            title={<span style={styles.title}>Fab Hotels</span>}
             onTitleClick={handleClick}
           />
-          <p className="App-intro">To get started, search in the input field.</p>
-           {/*  Creating the search Bar */}
-           <div>
-             <AutoComplete
-               hintText="Search"
-               dataSource={this.state.dataSource}
-               onUpdateInput={this.handleUpdateInput}
-             />
-            {nearbyIcon}
-            {/* <MobileTearSheet> */}
-    <List>
-      <ListItem primaryText={this.state.dataSource} leftIcon={<IconLocationOn />} />
-      <ListItem primaryText="Starred" leftIcon={<IconLocationOn />} />
-      <ListItem primaryText="Sent mail" leftIcon={<IconLocationOn />} />
-      <ListItem primaryText="Drafts" leftIcon={<IconLocationOn />} />
-      <ListItem primaryText="Inbox" leftIcon={<IconLocationOn />} />
-    </List>
+          <IconLocationOn/>
 
-  {/* </MobileTearSheet> */}
-           </div>
-           <SearchBar
-      onChange={this.handleUpdateInput}
-      onRequestSearch={() => console.log('onRequestSearch')}
-      style={{
-        margin: '0 auto',
-        maxWidth: 800
-      }}
-    />
-         </div>
-       </MuiThemeProvider>
+           {/*  Creating the search Bar */}
+          <SearchBar
+            onChange={(value)=>(this.handleUpdateInput(value))}
+            onRequestSearch={() => console.log('onRequestSearch')}
+            style={{
+              margin: '0 auto',
+              maxWidth: 800
+            }}
+          />
+          {placesList}
+        </div>
+      </MuiThemeProvider>
     );
   }
 }
