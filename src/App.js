@@ -51,29 +51,55 @@ class App extends Component {
     this.setState({
       dataSource: placesDetails,
     });
+
   }
 
   fetchPlaces(query){
-      let config = {
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        }
-      };
-      let host = 'https://maps.googleapis.com/';
-      let path =  "/maps/api/place/textsearch/" + GOOGLE_PLACES_OUTPUT_FORMAT ;
-      // let querystring = "?query="+ query +"&key=" +GOOGLE_PLACES_API_KEY+"&sensor=false+&region=india&radius=100";
-      let querystring = "?query="+ query +"&libraries=places&key=" +GOOGLE_PLACES_API_KEY+"&sensor=false+&region=india&radius=100";
-      let url = host + path + querystring;
+    // var map;
+    // var service;
+    // var infowindow;
+    // var pyrmont = new google.maps.LatLng(-33.8665433,151.1956316);
+    //
+    // // map = new google.maps.Map(document.getElementById('map'), {
+    // //   center: pyrmont,
+    // //   zoom: 15
+    // // });
+    //
+    // var request = {
+    // location: pyrmont,
+    // radius: '500',
+    // query: 'restaurant'
+    // };
+    //
+    // // service = new google.maps.places.PlacesService();
+    // service.textSearch(request, callback);
+    //
+    // function callback(results, status) {
+    //   if (status == google.maps.places.PlacesServiceStatus.OK) {
+    //     console.log(results);
+    //   }
+    // }
 
-      axios.get(url,config)
-        .then((response)=>{
-          console.info(response.data);
-          let placesDetails = response.data.results.map((place)=>(place.formatted_address));
-          this.updateDataSource(placesDetails);
-        })
-        .catch((error)=>{
-          console.info(error);
-        });
+  //     let config = {
+  //       headers: {
+  //         'Access-Control-Allow-Origin': '*',
+  //       }
+  //     };
+  //     let host = 'https://maps.googleapis.com/';
+  //     let path =  "/maps/api/place/textsearch/" + GOOGLE_PLACES_OUTPUT_FORMAT ;
+  //     // let querystring = "?query="+ query +"&key=" +GOOGLE_PLACES_API_KEY+"&sensor=false+&region=india&radius=100";
+  //     let querystring = "?query="+ query +"&libraries=places&key=" +GOOGLE_PLACES_API_KEY+"&sensor=false+&region=india&radius=100";
+  //     let url = host + path + querystring;
+  //
+  //     axios.get(url,config)
+  //       .then((response)=>{
+  //         console.info(response.data);
+  //         let placesDetails = response.data.results.map((place)=>(place.formatted_address));
+  //         this.updateDataSource(placesDetails);
+  //       })
+  //       .catch((error)=>{
+  //         console.info(error);
+  //       });
    }
 
 
@@ -87,7 +113,7 @@ class App extends Component {
   }
 
   render() {
-    console.log(this.state.dataSource);
+    console.log("service",window.service);
     let placesList = <Subheader >No data</Subheader>
     if(this.state.dataSource.length){
       placesList = this.createPlacesList(this.state.dataSource);
