@@ -5,8 +5,9 @@ import AppBar from 'material-ui/AppBar';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import IconLocationOn from 'material-ui/svg-icons/communication/location-on';
 import axios from 'axios';
-import {List, ListItem} from 'material-ui/List';
-import SearchBar from 'material-ui-search-bar'
+import { List, ListItem } from 'material-ui/List';
+import SearchBar from 'material-ui-search-bar';
+import TextField from 'material-ui/TextField';
 import Subheader from 'material-ui/Subheader';
 import {
   activateGeod,
@@ -31,96 +32,142 @@ const styles = {
 
 
 
+
 class App extends Component {
 
   constructor(props){
     super(props);
-    this.state = {
-      dataSource: [],
+    this.fetchPlaces= this.fetchPlaces.bind(this);
+    this.updateState= this.updateState.bind(this);
+    this.handleUpdateInput = this.handleUpdateInput.bind(this);
+    this.state={
+      placesRequestSucess:false,
+      placeResults:[],
+      hotelsRequestSucess:false,
+      hotelsResults:[],
     };
-    this.fetchPlaces = this.fetchPlaces.bind(this);
-    this.updateDataSource = this.updateDataSource.bind(this);
   }
 
-  handleUpdateInput(value){
-    //debugger;
-    this.fetchPlaces(value);
-  };
+  updateState(newState){
+    this.setState(newState);
+  }
 
-  updateDataSource(placesDetails){
-    this.setState({
-      dataSource: placesDetails,
+
+  fetchPlaces(query) {
+    var pyrmont = new window.google.maps.LatLng(-33.8665433,151.1956316);
+    var mapDiv = document.getElementById('map');
+    var map = new window.google.maps.Map(mapDiv, {
+      center: pyrmont,
+      zoom: 15
     });
 
+    var request ={
+      query,
+    }
+    var  updateState = this.updateState;
+    function handleTextSearchResponse(placeResults, placesServiceStatus) {
+      if (placesServiceStatus == window.google.maps.places.PlacesServiceStatus.OK) {
+        console.log(placeResults)
+        placeResults=placeResults.slice(0,5);
+        updateState({placesRequestSucess:true,placeResults:placeResults});
+      }
+      else {
+        console.error(placesServiceStatus);
+        updateState({placesRequestSucess:false,placeResults:["please try again eg 'taj mahal"]});
+      }
+    }
+
+    var placesSearch = new window.google.maps.places.PlacesService(map);
+    placesSearch.textSearch(request, handleTextSearchResponse);
+
   }
 
-  fetchPlaces(query){
-    // var map;
-    // var service;
-    // var infowindow;
-    // var pyrmont = new google.maps.LatLng(-33.8665433,151.1956316);
-    //
-    // // map = new google.maps.Map(document.getElementById('map'), {
-    // //   center: pyrmont,
-    // //   zoom: 15
-    // // });
-    //
-    // var request = {
-    // location: pyrmont,
-    // radius: '500',
-    // query: 'restaurant'
-    // };
-    //
-    // // service = new google.maps.places.PlacesService();
-    // service.textSearch(request, callback);
-    //
-    // function callback(results, status) {
-    //   if (status == google.maps.places.PlacesServiceStatus.OK) {
-    //     console.log(results);
-    //   }
-    // }
 
-  //     let config = {
-  //       headers: {
-  //         'Access-Control-Allow-Origin': '*',
-  //       }
-  //     };
-  //     let host = 'https://maps.googleapis.com/';
-  //     let path =  "/maps/api/place/textsearch/" + GOOGLE_PLACES_OUTPUT_FORMAT ;
-  //     // let querystring = "?query="+ query +"&key=" +GOOGLE_PLACES_API_KEY+"&sensor=false+&region=india&radius=100";
-  //     let querystring = "?query="+ query +"&libraries=places&key=" +GOOGLE_PLACES_API_KEY+"&sensor=false+&region=india&radius=100";
-  //     let url = host + path + querystring;
-  //
-  //     axios.get(url,config)
-  //       .then((response)=>{
-  //         console.info(response.data);
-  //         let placesDetails = response.data.results.map((place)=>(place.formatted_address));
-  //         this.updateDataSource(placesDetails);
-  //       })
-  //       .catch((error)=>{
-  //         console.info(error);
-  //       });
-   }
+  fetchHotels(query) {
+    // dummy map
+    var pyrmont = new window.google.maps.LatLng(-33.8665433,151.1956316);
+    var mapDiv = document.getElementById('map');
+    var map = new window.google.maps.Map(mapDiv, {
+      center: pyrmont,
+      zoom: 15
+    });
 
+    var request = {
+      query:query,
+      type: ['lodging','restaurant','bar','cafe']
+    };
 
-  createPlacesList(placesDetails){
-    this.placesList =  placesDetails.map((placesDetail,index)=>(<ListItem key={`key-${index}`} primaryText={placesDetail} leftIcon={<IconLocationOn />} />));
+    var  updateState = this.updateState;
+
+    function handleTextSearchResponse(hotelsResults, hotelsServiceStatus) {
+      if (hotelsServiceStatus == window.google.maps.places.PlacesServiceStatus.OK) {
+        hotelsResults=hotelsResults.slice(0,5);
+        updateState({hotelsRequestSucess:true,hotelsResults:hotelsResults});
+      }
+      else {
+        console.error(hotelsServiceStatus);
+        updateState({hotelsRequestSucess:true,hotelsResults:[]});
+      }
+    }
+
+    var hotelsSearch = new window.google.maps.places.PlacesService(map);
+    hotelsSearch.textSearch(request, handleTextSearchResponse);
+
+  }
+
+  createPlacesList(header,formatedName,placesDetails){
+    if(formatedName){
+      this.placesList =  placesDetails.map((placesDetail,index)=>(<ListItem key={`key-${index}`} primaryText={placesDetail.formatted_address} leftIcon={<IconLocationOn />} />));
+    }
+    else{
+      console.log('hotels',placesDetails);
+
+      var isHotelType = (type)=>{
+        return type == 'lodging' || type == 'restaurant' || type == 'cafe' || type == 'bar' ;
+      }
+      placesDetails = placesDetails.filter((place)=>{
+        if(place.types.some(isHotelType)){
+          return place;
+        };
+      });
+      console.log('hotels2',placesDetails);
+
+      this.placesList =  placesDetails.map((placesDetail,index)=>(<ListItem key={`key-${index}`} primaryText={placesDetail.name} leftIcon={<IconLocationOn />} />));
+    }
     return (
       <List>
-        <Subheader key={`key-header`}>places</Subheader>
+        <Subheader key={`key-${header}`}>{header}</Subheader>
         {this.placesList}
       </List>);
   }
 
-  render() {
-    console.log("service",window.service);
-    let placesList = <Subheader >No data</Subheader>
-    if(this.state.dataSource.length){
-      placesList = this.createPlacesList(this.state.dataSource);
+  handleUpdateInput(value){
+    if(value){
+      this.fetchPlaces(value);
+      this.fetchHotels(value);
     }
+  };
+
+  render() {
+    let placesList = <Subheader>No data</Subheader>
+    if(this.state.placesRequestSucess){
+      placesList = this.createPlacesList('Places',true,this.state.placeResults);
+    }
+    let hotelsList = true;
+    if(this.state.hotelsRequestSucess){
+      console.log('hotel list');
+
+      hotelsList = this.createPlacesList('Hotels',false,this.state.hotelsResults);
+    }
+
     return (
       <MuiThemeProvider>
         <div className="App">
+          <div id={'map'} ref={this.map} ></div>
+
+          {/* <button type="button" onClick={()=>this.fetchPlaces('punjabi dhaba in bnagalore')}>Click place!</button>
+          <button type="button" onClick={()=>this.fetchHotels('punjabi dhaba in bnagalore')}>Click hotel!</button> */}
+          {/* <input   onChange={(query)=>this.fetchPlaces(query)}></input> */}
           <AppBar
             title={<span style={styles.title}>Fab Hotels</span>}
             onTitleClick={handleClick}
@@ -137,6 +184,7 @@ class App extends Component {
             }}
           />
           {placesList}
+          {hotelsList}
         </div>
       </MuiThemeProvider>
     );
@@ -144,3 +192,4 @@ class App extends Component {
 }
 
 export default App;
+ 
