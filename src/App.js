@@ -22,7 +22,7 @@ export const GOOGLE_PLACES_OUTPUT_FORMAT = "json"
 const nearbyIcon = <IconLocationOn />;
 
 function handleClick() {
-  alert('Welcome to Fab Hotels');
+  alert('Welcome');
 }
 
 const styles = {
@@ -170,7 +170,7 @@ class App extends Component {
           <button type="button" onClick={()=>this.fetchHotels('punjabi dhaba in bnagalore')}>Click hotel!</button> */}
           {/* <input   onChange={(query)=>this.fetchPlaces(query)}></input> */}
           <AppBar
-            title={<span style={styles.title}>Fab Hotels</span>}
+            title={<span style={styles.title}>Search Tool</span>}
             onTitleClick={handleClick}
           />
           <IconLocationOn/>
