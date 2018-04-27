@@ -13,6 +13,7 @@ import {
   activateGeod,
   closeGeod,
 } from './redux';
+
 // set environment variables
 export const GOOGLE_PLACES_API_KEY = "AIzaSyCp3fWNRJXJxq0gJnj_t_vvGsffF11nsJ0"
 export const GOOGLE_PLACES_OUTPUT_FORMAT = "json"
@@ -192,4 +193,3 @@ class App extends Component {
 }
 
 export default App;
- 
